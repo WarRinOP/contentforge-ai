@@ -1,6 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
+import {
+  getSessionId,
+  getAdminKey,
+  setStoredRemaining,
+  MAX_GENERATIONS,
+} from "@/lib/session";
 
 const CONTENT_TYPES = [
   { value: "Blog Post", icon: "📝", label: "Blog Post" },
@@ -19,11 +25,19 @@ const TONES = [
 
 interface TopicInputProps {
   onResult: (data: Record<string, unknown>) => void;
+  onRemaining?: (n: number) => void;
   isGenerating: boolean;
   setIsGenerating: (v: boolean) => void;
+  exhaustedTest?: boolean;
 }
 
-export default function TopicInput({ onResult, isGenerating, setIsGenerating }: TopicInputProps) {
+export default function TopicInput({
+  onResult,
+  onRemaining,
+  isGenerating,
+  setIsGenerating,
+  exhaustedTest,
+}: TopicInputProps) {
   const [topic, setTopic] = useState("");
   const [targetAudience, setTargetAudience] = useState("");
   const [contentType, setContentType] = useState("Blog Post");
@@ -43,21 +57,40 @@ export default function TopicInput({ onResult, isGenerating, setIsGenerating }: 
     setError("");
     setIsGenerating(true);
     try {
+      const sessionId = getSessionId();
+      const adminKey = getAdminKey();
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      // Check Block mode: deliberately omit admin key so real rate limit fires
+      if (adminKey && !exhaustedTest) headers["x-admin-key"] = adminKey;
+
       const res = await fetch("/api/generate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           topic: topic.trim(),
           targetAudience: targetAudience.trim() || "general audience",
           contentType,
           tone,
+          session_id: sessionId,
         }),
       });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Generation failed");
-      }
+
       const data = await res.json();
+
+      if (res.status === 429) {
+        setError(data.error || `You've used all ${MAX_GENERATIONS} free generations.`);
+        onRemaining?.(0);
+        setStoredRemaining(0);
+        return;
+      }
+
+      if (!res.ok) {
+        throw new Error(data.error || "Generation failed");
+      }
+
+      const remaining = typeof data.remaining === "number" ? data.remaining : MAX_GENERATIONS;
+      onRemaining?.(remaining);
+      setStoredRemaining(remaining);
       onResult(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");

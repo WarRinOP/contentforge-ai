@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { generateWithClaude } from "@/lib/claude";
 import { getSupabaseAdmin } from "@/lib/supabase";
 
+const MAX_GENERATIONS = 3;
+const MAX_IP_GENERATIONS = 10; // across all sessions from same IP
+
 const SYSTEM_PROMPT = `You are an expert SEO strategist and content director. Generate comprehensive SEO briefs and content outlines that rank on Google. Always respond with a single valid JSON object. No markdown. No backticks. No explanation.`;
 
 function buildUserPrompt(
@@ -64,7 +67,77 @@ Topic: ${topic}`;
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { topic, targetAudience, contentType, tone } = body;
+    const { topic, targetAudience, contentType, tone, session_id } = body;
+
+    // ── Admin bypass ────────────────────────────────────
+    const adminKey = request.headers.get("x-admin-key") || "";
+    const isAdmin = adminKey && adminKey === process.env.ADMIN_SECRET;
+
+    // Simulate block (Check Block mode) — fires BEFORE admin bypass
+    if (
+      request.headers.get("x-simulate-block") === "true" &&
+      adminKey === process.env.ADMIN_SECRET
+    ) {
+      return NextResponse.json(
+        {
+          error: `You've used all ${MAX_GENERATIONS} free generations. This is a portfolio demo — reach out for unlimited access!`,
+          code: "RATE_LIMIT",
+          remaining: 0,
+        },
+        { status: 429 }
+      );
+    }
+
+    // ── Rate limiting (skipped for admin) ───────────────
+    const supabase = getSupabaseAdmin();
+    const ip =
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      "unknown";
+
+    if (!isAdmin) {
+      // Session check
+      if (session_id) {
+        const { data: session } = await supabase
+          .from("cf_sessions")
+          .select("usage_count")
+          .eq("session_id", session_id)
+          .single();
+
+        if (session && session.usage_count >= MAX_GENERATIONS) {
+          return NextResponse.json(
+            {
+              error: `You've used all ${MAX_GENERATIONS} free generations. This is a portfolio demo — reach out for unlimited access!`,
+              code: "RATE_LIMIT",
+              remaining: 0,
+            },
+            { status: 429 }
+          );
+        }
+      }
+
+      // IP check
+      if (ip !== "unknown") {
+        const { data: ipSessions } = await supabase
+          .from("cf_sessions")
+          .select("usage_count")
+          .eq("ip", ip);
+
+        const ipTotal = (ipSessions || []).reduce(
+          (sum, s) => sum + (s.usage_count || 0),
+          0
+        );
+        if (ipTotal >= MAX_IP_GENERATIONS) {
+          return NextResponse.json(
+            {
+              error: `Generation limit reached for this network.`,
+              code: "RATE_LIMIT",
+              remaining: 0,
+            },
+            { status: 429 }
+          );
+        }
+      }
+    }
 
     // Validate topic
     if (!topic || typeof topic !== "string" || topic.trim().length === 0) {
@@ -96,10 +169,11 @@ export async function POST(request: NextRequest) {
     // Parse JSON response
     let parsed;
     try {
-      // Clean the response — remove any markdown code fences if present
       let cleaned = claudeResponse.trim();
       if (cleaned.startsWith("```")) {
-        cleaned = cleaned.replace(/^```(?:json)?\s*\n?/, "").replace(/\n?```\s*$/, "");
+        cleaned = cleaned
+          .replace(/^```(?:json)?\s*\n?/, "")
+          .replace(/\n?```\s*$/, "");
       }
       parsed = JSON.parse(cleaned);
     } catch {
@@ -110,7 +184,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Save to Supabase
-    const supabase = getSupabaseAdmin();
     const { data, error: dbError } = await supabase
       .from("cf_content")
       .insert({
@@ -139,9 +212,50 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(data, { status: 201 });
+    // ── Update session usage count (skip for admin) ─────
+    if (!isAdmin && session_id) {
+      try {
+        await supabase.rpc("increment_cf_usage", { sid: session_id, new_ip: ip });
+      } catch {
+        // RPC not available — manual upsert fallback
+        const { data: existing } = await supabase
+          .from("cf_sessions")
+          .select("usage_count")
+          .eq("session_id", session_id)
+          .single();
+        await supabase.from("cf_sessions").upsert(
+          {
+            session_id,
+            usage_count: (existing?.usage_count ?? 0) + 1,
+            ip,
+            last_seen_at: new Date().toISOString(),
+          },
+          { onConflict: "session_id" }
+        );
+      }
+    }
+
+
+    // Calculate remaining
+    let remaining = MAX_GENERATIONS;
+    if (!isAdmin && session_id) {
+      const { data: updatedSession } = await supabase
+        .from("cf_sessions")
+        .select("usage_count")
+        .eq("session_id", session_id)
+        .single();
+      remaining = Math.max(
+        0,
+        MAX_GENERATIONS - (updatedSession?.usage_count ?? 0)
+      );
+    } else if (isAdmin) {
+      remaining = 999;
+    }
+
+    return NextResponse.json({ ...data, remaining }, { status: 201 });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Internal server error";
+    const message =
+      err instanceof Error ? err.message : "Internal server error";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
