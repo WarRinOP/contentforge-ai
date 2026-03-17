@@ -21,30 +21,72 @@ function isWithinLastNDays(dateStr: string, days: number): boolean {
 
 export default function HistoryStats({ content, isLoading }: HistoryStatsProps) {
   const stats = [
-    { label: "Total Pieces", value: content.length, color: "text-text-primary" },
-    { label: "Drafted", value: content.filter((c) => c.status === "drafted").length, color: "text-success" },
-    { label: "Outlined", value: content.filter((c) => c.status === "outlined").length, color: "text-info" },
-    { label: "This Week", value: content.filter((c) => isWithinLastNDays(c.created_at, 7)).length, color: "text-warning" },
+    { label: "Total Pieces", value: content.length, color: "#f0f4f8" },
+    { label: "Drafted", value: content.filter((c) => c.status === "drafted").length, color: "#10b981" },
+    { label: "Outlined", value: content.filter((c) => c.status === "outlined").length, color: "#3b82f6" },
+    { label: "This Week", value: content.filter((c) => isWithinLastNDays(c.created_at, 7)).length, color: "#f59e0b" },
   ];
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(2, 1fr)",
+        gap: "16px",
+        marginBottom: "8px",
+      }}>
+        <style>{`@media (min-width: 768px) { .stats-grid-cf { grid-template-columns: repeat(4, 1fr) !important; } }`}</style>
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="bg-bg-surface border border-border-default rounded-xl p-5 h-24 animate-shimmer" />
+          <div key={i} className="animate-shimmer" style={{
+            background: "#0e1012",
+            border: "1px solid #1d2327",
+            borderRadius: "12px",
+            height: "90px",
+          }} />
         ))}
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-      {stats.map((stat) => (
-        <div key={stat.label} className="bg-bg-surface border border-border-default rounded-xl p-5">
-          <div className={`metric-value mb-1 ${stat.color}`}>{stat.value}</div>
-          <div className="label">{stat.label}</div>
-        </div>
-      ))}
-    </div>
+    <>
+      <style>{`@media (min-width: 768px) { .stats-grid-cf { grid-template-columns: repeat(4, 1fr) !important; } }`}</style>
+      <div className="stats-grid-cf" style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(2, 1fr)",
+        gap: "16px",
+        marginBottom: "8px",
+      }}>
+        {stats.map((stat) => (
+          <div key={stat.label} style={{
+            background: "#0e1012",
+            border: "1px solid #1d2327",
+            borderRadius: "12px",
+            padding: "20px 24px",
+            transition: "border-color 0.2s",
+          }}>
+            <div style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: "28px",
+              fontWeight: "700",
+              color: stat.color,
+              lineHeight: 1.1,
+              marginBottom: "6px",
+            }}>
+              {stat.value}
+            </div>
+            <div style={{
+              fontSize: "11px",
+              fontWeight: "600",
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
+              color: "#445566",
+            }}>
+              {stat.label}
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
   );
 }

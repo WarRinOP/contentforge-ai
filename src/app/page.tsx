@@ -78,54 +78,91 @@ export default function Home() {
   };
 
   return (
-    <div className="page-container">
-      {/* Page Header */}
-      <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold text-text-primary tracking-tight mb-3">
+    <div style={{ minHeight: "calc(100vh - 64px)" }}>
+      {/* Hero */}
+      <div style={{
+        textAlign: "center",
+        padding: "clamp(40px, 7vw, 64px) 20px 32px",
+        maxWidth: "640px",
+        margin: "0 auto",
+        width: "100%",
+      }}>
+        <h1 style={{
+          fontSize: "clamp(26px, 6vw, 40px)",
+          fontWeight: "800",
+          lineHeight: 1.15,
+          color: "#f0f4f8",
+          margin: "0 0 12px",
+          letterSpacing: "-0.02em",
+        }}>
           AI-Powered SEO Content Generator
         </h1>
-        <p className="text-text-secondary text-base max-w-xl mx-auto leading-relaxed">
-          Enter a topic to get a complete SEO brief, article outline, meta tags,
-          and full draft — powered by Claude.
+        <p style={{ fontSize: "clamp(14px, 3vw, 16px)", color: "#8b9eb0", lineHeight: 1.7, margin: "0 0 6px" }}>
+          Enter a topic to get a complete SEO brief, outline, meta tags, and full draft.
         </p>
-        <p className="text-text-muted text-sm mt-2 mono">
+        <p style={{ fontSize: "12px", color: "#445566", fontFamily: "'JetBrains Mono', monospace" }}>
           claude-haiku-4-5
         </p>
       </div>
 
-      {/* Topic Input */}
-      <TopicInput
-        onResult={handleResult}
-        isGenerating={isGenerating}
-        setIsGenerating={setIsGenerating}
-      />
+      {/* Form */}
+      <div style={{ maxWidth: "720px", margin: "0 auto", width: "100%", padding: "0 16px" }}>
+        <TopicInput
+          onResult={handleResult}
+          isGenerating={isGenerating}
+          setIsGenerating={setIsGenerating}
+        />
+      </div>
 
-      {/* Generator Results */}
+      {/* Results */}
       {currentContent && (
-        <div className="mt-10">
+        <div style={{ maxWidth: "1200px", margin: "40px auto 0", width: "100%", padding: "0 20px" }}>
           <GeneratorResults content={currentContent} onDraftGenerated={handleDraftGenerated} />
         </div>
       )}
 
       {/* Recent Content */}
       {recentContent.length > 0 && (
-        <div className="mt-14 pb-8">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wider">Recent Content</h2>
-            <Link href="/history" className="text-sm text-text-muted hover:text-accent transition-colors">
+        <div style={{ maxWidth: "720px", margin: "48px auto 0", width: "100%", padding: "0 16px 60px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
+            <h2 style={{ fontSize: "13px", fontWeight: "600", color: "#445566", textTransform: "uppercase", letterSpacing: "0.08em", margin: 0 }}>
+              Recent Content
+            </h2>
+            <Link href="/history" style={{ fontSize: "12px", color: "#10b981", textDecoration: "none" }}>
               View all →
             </Link>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             {recentContent.map((item) => (
-              <Link key={item.id} href={`/content/${item.id}`}
-                className="group bg-bg-surface border border-border-default rounded-xl p-5 hover:border-border-hover transition-all duration-200">
-                <p className="text-sm text-text-primary font-medium mb-3 line-clamp-2 group-hover:text-accent transition-colors leading-relaxed">
-                  {item.topic.length > 65 ? item.topic.slice(0, 65) + "..." : item.topic}
-                </p>
-                <div className="flex items-center justify-between">
+              <Link
+                key={item.id}
+                href={`/content/${item.id}`}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "14px 18px",
+                  background: "#0e1012",
+                  border: "1px solid #1d2327",
+                  borderRadius: "10px",
+                  textDecoration: "none",
+                  transition: "border-color 0.15s",
+                  gap: "12px",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#2a3540")}
+                onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#1d2327")}
+              >
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: "14px", fontWeight: "500", color: "#f0f4f8", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {item.topic.length > 70 ? item.topic.slice(0, 70) + "…" : item.topic}
+                  </div>
+                  <div style={{ fontSize: "12px", color: "#445566", marginTop: "3px" }}>
+                    {item.status}
+                  </div>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", flexShrink: 0 }}>
                   <Badge variant={statusBadge[item.status] || "gray"}>{item.status}</Badge>
-                  <span className="text-xs text-text-muted">{timeAgo(item.created_at)}</span>
+                  <span style={{ fontSize: "12px", color: "#445566" }}>{timeAgo(item.created_at)}</span>
                 </div>
               </Link>
             ))}

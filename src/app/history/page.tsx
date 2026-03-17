@@ -87,36 +87,62 @@ export default function HistoryPage() {
   }, [allContent]);
 
   return (
-    <div className="page-container">
+    <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "40px 20px 80px" }}>
       {/* Header */}
-      <div className="flex items-start justify-between mb-8">
+      <div style={{
+        display: "flex",
+        alignItems: "flex-start",
+        justifyContent: "space-between",
+        flexWrap: "wrap",
+        gap: "16px",
+        marginBottom: "32px",
+      }}>
         <div>
-          <h1 className="text-3xl font-bold text-text-primary tracking-tight mb-1.5">
+          <h1 style={{ fontSize: "24px", fontWeight: "700", color: "#f0f4f8", margin: "0 0 6px" }}>
             Content History
           </h1>
-          <p className="text-text-secondary text-base">
+          <p style={{ fontSize: "14px", color: "#445566", margin: 0 }}>
             All your generated content pieces
           </p>
         </div>
         <Link
           href="/"
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-accent text-bg-primary text-sm font-semibold rounded-lg hover:bg-accent-hover transition-colors shrink-0"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "6px",
+            padding: "9px 18px",
+            background: "#10b981",
+            color: "#070809",
+            fontSize: "14px",
+            fontWeight: "600",
+            borderRadius: "8px",
+            textDecoration: "none",
+            transition: "background 0.15s",
+            flexShrink: 0,
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = "#059669")}
+          onMouseLeave={(e) => (e.currentTarget.style.background = "#10b981")}
         >
           + New Content
         </Link>
       </div>
 
       {/* Stats */}
-      <HistoryStats content={allContent} isLoading={isLoading} />
+      <div style={{ marginBottom: "24px" }}>
+        <HistoryStats content={allContent} isLoading={isLoading} />
+      </div>
 
       {/* Filters */}
-      <FilterBar
-        search={search} status={status} contentType={contentType} period={period}
-        totalCount={allContent.length} filteredCount={filteredContent.length}
-        onSearchChange={setSearch} onStatusChange={setStatus}
-        onContentTypeChange={setContentType} onPeriodChange={setPeriod}
-        onClearFilters={clearFilters}
-      />
+      <div style={{ marginBottom: "16px" }}>
+        <FilterBar
+          search={search} status={status} contentType={contentType} period={period}
+          totalCount={allContent.length} filteredCount={filteredContent.length}
+          onSearchChange={setSearch} onStatusChange={setStatus}
+          onContentTypeChange={setContentType} onPeriodChange={setPeriod}
+          onClearFilters={clearFilters}
+        />
+      </div>
 
       {/* Table */}
       <ContentTable

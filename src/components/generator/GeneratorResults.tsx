@@ -38,20 +38,28 @@ export default function GeneratorResults({ content, onDraftGenerated }: Generato
   }, [content.id]);
 
   return (
-    <div ref={containerRef} className="animate-fade-in-up scroll-mt-20">
-      <div className="mb-6">
+    <div ref={containerRef} className="animate-fade-in-up" style={{ scrollMarginTop: "80px" }}>
+      {/* Brief — full width */}
+      <div style={{ marginBottom: "24px" }}>
         <BriefPanel content={content} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <div className="min-w-0 overflow-hidden">
+      {/* Outline + Meta — side by side on lg, stacked on mobile */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 400px), 1fr))",
+        gap: "24px",
+        marginBottom: "24px",
+      }}>
+        <div style={{ minWidth: 0, overflow: "hidden" }}>
           {content.outline && <OutlinePanel outline={content.outline} />}
         </div>
-        <div className="min-w-0 overflow-hidden">
+        <div style={{ minWidth: 0, overflow: "hidden" }}>
           <MetaPanel content={content} />
         </div>
       </div>
 
+      {/* Draft — full width */}
       <DraftPanel content={content} onDraftGenerated={onDraftGenerated} />
     </div>
   );

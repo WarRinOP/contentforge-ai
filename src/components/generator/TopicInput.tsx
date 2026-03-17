@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Button from "@/components/ui/Button";
 
 const CONTENT_TYPES = [
   { value: "Blog Post", icon: "📝", label: "Blog Post" },
@@ -40,10 +39,7 @@ export default function TopicInput({ onResult, isGenerating, setIsGenerating }: 
   };
 
   const handleSubmit = async () => {
-    if (!topic.trim()) {
-      setError("Topic is required.");
-      return;
-    }
+    if (!topic.trim()) { setError("Topic is required."); return; }
     setError("");
     setIsGenerating(true);
     try {
@@ -70,107 +66,221 @@ export default function TopicInput({ onResult, isGenerating, setIsGenerating }: 
     }
   };
 
+  const labelStyle: React.CSSProperties = {
+    fontSize: "11px",
+    fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: "0.08em",
+    color: "#445566",
+    display: "block",
+    marginBottom: "8px",
+  };
+
+  const inputStyle: React.CSSProperties = {
+    background: "#161a1d",
+    border: "1px solid #1d2327",
+    borderRadius: "8px",
+    color: "#f0f4f8",
+    fontSize: "14px",
+    padding: "10px 14px",
+    width: "100%",
+    outline: "none",
+    fontFamily: "inherit",
+    transition: "border-color 0.15s",
+  };
+
   return (
-    <div className="form-container">
-      <div className="bg-bg-surface border border-border-default rounded-2xl p-6">
-        {/* Topic */}
-        <div className="mb-5">
-          <label className="label mb-2 block">Topic *</label>
-          <div className="relative">
-            <textarea
-              value={topic}
-              onChange={(e) => { setTopic(e.target.value); if (error) setError(""); }}
-              placeholder="Enter your content topic... e.g. 'best CRM software for small business 2026'"
-              rows={3}
-              className="w-full bg-bg-surface2 border border-border-default rounded-xl px-4 py-3 text-sm text-text-primary placeholder:text-text-muted resize-none focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20 transition-colors"
-              disabled={isGenerating}
-            />
-            <span className="absolute bottom-3 right-4 text-xs text-text-muted mono">{topic.length}</span>
-          </div>
-        </div>
-
-        {/* Target Audience */}
-        <div className="mb-5">
-          <label className="label mb-2 block">
-            Target Audience <span className="text-text-muted normal-case font-normal">(optional)</span>
-          </label>
-          <input
-            type="text"
-            value={targetAudience}
-            onChange={(e) => setTargetAudience(e.target.value)}
-            placeholder="e.g. small business owners, marketing managers"
-            className="w-full bg-bg-surface2 border border-border-default rounded-xl px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/20 transition-colors"
+    <div style={{
+      background: "#0e1012",
+      border: "1px solid #1d2327",
+      borderRadius: "12px",
+      padding: "24px",
+      transition: "border-color 0.2s",
+    }}>
+      {/* Topic */}
+      <div style={{ marginBottom: "20px" }}>
+        <label style={labelStyle}>Topic *</label>
+        <div style={{ position: "relative" }}>
+          <textarea
+            value={topic}
+            onChange={(e) => { setTopic(e.target.value); if (error) setError(""); }}
+            placeholder="Enter your content topic... e.g. 'best CRM software for small business 2026'"
+            rows={3}
             disabled={isGenerating}
+            style={{ ...inputStyle, resize: "none", paddingRight: "44px" }}
+            onFocus={(e) => (e.target.style.borderColor = "#10b981")}
+            onBlur={(e) => (e.target.style.borderColor = "#1d2327")}
           />
+          <span style={{
+            position: "absolute",
+            bottom: "10px",
+            right: "14px",
+            fontSize: "11px",
+            color: "#445566",
+            fontFamily: "'JetBrains Mono', monospace",
+          }}>{topic.length}</span>
         </div>
+      </div>
 
-        {/* Content Type */}
-        <div className="mb-5">
-          <label className="label mb-2 block">Content Type</label>
-          <div className="flex flex-wrap gap-2">
-            {CONTENT_TYPES.map((ct) => (
+      {/* Target Audience */}
+      <div style={{ marginBottom: "20px" }}>
+        <label style={labelStyle}>
+          Target Audience{" "}
+          <span style={{ textTransform: "none", fontWeight: "400", color: "#445566" }}>(optional)</span>
+        </label>
+        <input
+          type="text"
+          value={targetAudience}
+          onChange={(e) => setTargetAudience(e.target.value)}
+          placeholder="e.g. small business owners, marketing managers"
+          disabled={isGenerating}
+          style={inputStyle}
+          onFocus={(e) => (e.target.style.borderColor = "#10b981")}
+          onBlur={(e) => (e.target.style.borderColor = "#1d2327")}
+        />
+      </div>
+
+      {/* Content Type */}
+      <div style={{ marginBottom: "20px" }}>
+        <label style={labelStyle}>Content Type</label>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+          {CONTENT_TYPES.map((ct) => {
+            const active = contentType === ct.value;
+            return (
               <button
                 key={ct.value}
                 onClick={() => setContentType(ct.value)}
                 disabled={isGenerating}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition-all cursor-pointer ${
-                  contentType === ct.value
-                    ? "border-accent bg-accent/10 text-accent"
-                    : "border-border-default bg-bg-surface2 text-text-secondary hover:border-border-hover hover:text-text-primary"
-                }`}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "7px 14px",
+                  borderRadius: "8px",
+                  border: `1px solid ${active ? "#10b981" : "#1d2327"}`,
+                  background: active ? "rgba(16,185,129,0.1)" : "#161a1d",
+                  color: active ? "#10b981" : "#8b9eb0",
+                  fontSize: "13px",
+                  fontWeight: "500",
+                  cursor: isGenerating ? "not-allowed" : "pointer",
+                  transition: "all 0.15s",
+                  fontFamily: "inherit",
+                }}
+                onMouseEnter={(e) => { if (!active && !isGenerating) { e.currentTarget.style.borderColor = "#2a3540"; e.currentTarget.style.color = "#f0f4f8"; }}}
+                onMouseLeave={(e) => { if (!active) { e.currentTarget.style.borderColor = "#1d2327"; e.currentTarget.style.color = "#8b9eb0"; }}}
               >
                 <span>{ct.icon}</span>
                 <span>{ct.label}</span>
               </button>
-            ))}
-          </div>
+            );
+          })}
         </div>
+      </div>
 
-        {/* Tone */}
-        <div className="mb-6">
-          <label className="label mb-2 block">Tone</label>
-          <div className="flex flex-wrap gap-2">
-            {TONES.map((t) => (
+      {/* Tone */}
+      <div style={{ marginBottom: "24px" }}>
+        <label style={labelStyle}>Tone</label>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+          {TONES.map((t) => {
+            const active = tone === t.value;
+            return (
               <button
                 key={t.value}
                 onClick={() => setTone(t.value)}
                 disabled={isGenerating}
-                className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all cursor-pointer ${
-                  tone === t.value
-                    ? "border-accent bg-accent/10 text-accent"
-                    : "border-border-default bg-bg-surface2 text-text-secondary hover:border-border-hover hover:text-text-primary"
-                }`}
+                style={{
+                  padding: "7px 14px",
+                  borderRadius: "8px",
+                  border: `1px solid ${active ? "#10b981" : "#1d2327"}`,
+                  background: active ? "rgba(16,185,129,0.1)" : "#161a1d",
+                  color: active ? "#10b981" : "#8b9eb0",
+                  fontSize: "13px",
+                  fontWeight: "500",
+                  cursor: isGenerating ? "not-allowed" : "pointer",
+                  transition: "all 0.15s",
+                  fontFamily: "inherit",
+                }}
+                onMouseEnter={(e) => { if (!active && !isGenerating) { e.currentTarget.style.borderColor = "#2a3540"; e.currentTarget.style.color = "#f0f4f8"; }}}
+                onMouseLeave={(e) => { if (!active) { e.currentTarget.style.borderColor = "#1d2327"; e.currentTarget.style.color = "#8b9eb0"; }}}
               >
                 {t.label}
               </button>
-            ))}
-          </div>
+            );
+          })}
         </div>
-
-        {/* Submit */}
-        <Button variant="primary" size="lg" fullWidth loading={isGenerating} loadingText="Generating with Claude..." onClick={handleSubmit}>
-          Generate SEO Brief →
-        </Button>
-
-        {/* Error */}
-        {error && (
-          <p className="mt-3 text-sm text-danger flex items-center gap-2">
-            <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-            </svg>
-            {error}
-          </p>
-        )}
-
-        {/* Sample Topic */}
-        {!isGenerating && (
-          <div className="mt-3 text-center">
-            <button onClick={fillSample} className="text-sm text-text-muted hover:text-accent transition-colors cursor-pointer">
-              Try a sample topic →
-            </button>
-          </div>
-        )}
       </div>
+
+      {/* Submit */}
+      <button
+        onClick={handleSubmit}
+        disabled={isGenerating}
+        style={{
+          width: "100%",
+          padding: "12px 24px",
+          background: isGenerating ? "#059669" : "#10b981",
+          color: "#070809",
+          fontSize: "15px",
+          fontWeight: "600",
+          borderRadius: "8px",
+          border: "none",
+          cursor: isGenerating ? "not-allowed" : "pointer",
+          fontFamily: "inherit",
+          transition: "background 0.15s",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "8px",
+          opacity: isGenerating ? 0.85 : 1,
+        }}
+        onMouseEnter={(e) => { if (!isGenerating) e.currentTarget.style.background = "#059669"; }}
+        onMouseLeave={(e) => { if (!isGenerating) e.currentTarget.style.background = "#10b981"; }}
+      >
+        {isGenerating ? (
+          <>
+            <span style={{
+              width: "14px", height: "14px",
+              border: "2px solid rgba(7,8,9,0.3)",
+              borderTop: "2px solid #070809",
+              borderRadius: "50%",
+              animation: "spin 0.7s linear infinite",
+              display: "inline-block",
+              flexShrink: 0,
+            }} />
+            Generating with Claude...
+          </>
+        ) : (
+          "Generate SEO Brief →"
+        )}
+      </button>
+
+      {/* Error */}
+      {error && (
+        <div style={{ marginTop: "12px", fontSize: "13px", color: "#ef4444", display: "flex", alignItems: "center", gap: "6px" }}>
+          ⚠ {error}
+        </div>
+      )}
+
+      {/* Sample */}
+      {!isGenerating && (
+        <div style={{ marginTop: "12px", textAlign: "center" }}>
+          <button
+            onClick={fillSample}
+            style={{
+              background: "none",
+              border: "none",
+              fontSize: "13px",
+              color: "#445566",
+              cursor: "pointer",
+              fontFamily: "inherit",
+              transition: "color 0.15s",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#10b981")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "#445566")}
+          >
+            Try a sample topic →
+          </button>
+        </div>
+      )}
     </div>
   );
 }

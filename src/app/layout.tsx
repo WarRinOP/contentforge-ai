@@ -36,7 +36,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         <Navbar />
-        <main style={{ paddingTop: "80px" }}>{children}</main>
+        <main style={{ minHeight: "calc(100vh - 64px)" }}>{children}</main>
         <Toaster
           position="bottom-right"
           toastOptions={{
