@@ -34,31 +34,27 @@ export default function BriefPanel({ content }: BriefPanelProps) {
       }
     >
       {/* Target Keyword */}
-      <div className="mb-5">
-        <span className="label block mb-1.5">Target Keyword</span>
-        <div className="flex items-center gap-2">
-          <span className="text-lg font-semibold text-accent mono">
+      <div className="mb-4">
+        <span className="label block mb-1">Target Keyword</span>
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-base font-semibold text-accent mono break-all">
             {content.target_keyword || "—"}
           </span>
           {content.target_keyword && (
-            <CopyButton
-              textToCopy={content.target_keyword}
-              label="keyword"
-              variant="inline"
-            />
+            <CopyButton textToCopy={content.target_keyword} label="keyword" variant="inline" />
           )}
         </div>
       </div>
 
       {/* Secondary Keywords */}
       {content.secondary_keywords && content.secondary_keywords.length > 0 && (
-        <div className="mb-5">
-          <span className="label block mb-2">Secondary Keywords</span>
+        <div className="mb-4">
+          <span className="label block mb-1.5">Secondary Keywords</span>
           <div className="flex flex-wrap gap-1.5">
             {content.secondary_keywords.map((kw, i) => (
               <span
                 key={i}
-                className="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full bg-accent/8 text-accent/80 border border-accent/15"
+                className="inline-flex items-center px-2 py-0.5 text-[11px] font-medium rounded-full bg-accent/8 text-accent/80 border border-accent/15"
               >
                 {kw}
               </span>
@@ -68,7 +64,7 @@ export default function BriefPanel({ content }: BriefPanelProps) {
       )}
 
       {/* Intent + Word Count */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3">
         <div className="bg-bg-surface2 rounded-lg p-3 border border-border-default">
           <span className="label block mb-1">Search Intent</span>
           {content.search_intent ? (
@@ -76,17 +72,13 @@ export default function BriefPanel({ content }: BriefPanelProps) {
               {content.search_intent}
             </Badge>
           ) : (
-            <span className="text-text-muted text-sm">—</span>
+            <span className="text-text-muted text-xs">—</span>
           )}
         </div>
         <div className="bg-bg-surface2 rounded-lg p-3 border border-border-default">
           <span className="label block mb-1">Recommended Length</span>
-          <div>
-            <span className="metric-value text-xl">
-              {content.recommended_word_count?.toLocaleString() || "—"}
-            </span>
-            <span className="text-text-muted text-xs ml-1">words</span>
-          </div>
+          <span className="metric-value text-lg">{content.recommended_word_count?.toLocaleString() || "—"}</span>
+          <span className="text-text-muted text-[11px] ml-1">words</span>
         </div>
       </div>
     </Card>

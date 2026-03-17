@@ -101,7 +101,7 @@ export default function ContentPage() {
 
   if (loading) {
     return (
-      <div className="max-w-5xl mx-auto px-6 py-10">
+      <div className="page-container">
         <div className="space-y-6">
           <div className="h-8 w-48 animate-shimmer rounded" />
           <div className="h-4 w-96 animate-shimmer rounded" />
@@ -113,7 +113,7 @@ export default function ContentPage() {
 
   if (error || !content) {
     return (
-      <div className="max-w-5xl mx-auto px-6 py-10">
+      <div className="page-container">
         <div className="bg-bg-surface border border-border-default rounded-xl p-12 text-center">
           <p className="text-text-secondary mb-4">{error || "Content not found"}</p>
           <Link
@@ -128,12 +128,12 @@ export default function ContentPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-10">
+    <div className="page-container">
       {/* Header */}
       <div className="mb-8">
         <Link
           href="/history"
-          className="text-text-muted hover:text-text-secondary text-sm transition-colors inline-flex items-center gap-1 mb-4"
+          className="text-text-muted hover:text-text-secondary text-xs transition-colors inline-flex items-center gap-1 mb-4"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
@@ -143,7 +143,7 @@ export default function ContentPage() {
 
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-xl font-bold text-text-primary mb-2">
+            <h1 className="text-lg font-bold text-text-primary mb-1.5">
               {content.topic}
             </h1>
             <div className="flex items-center gap-2">
@@ -186,7 +186,7 @@ export default function ContentPage() {
       <div className="space-y-6">
         <BriefPanel content={content} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-[55%_1fr] gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {content.outline && <OutlinePanel outline={content.outline} />}
           <MetaPanel content={content} />
         </div>

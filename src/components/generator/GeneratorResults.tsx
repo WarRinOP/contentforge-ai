@@ -28,36 +28,30 @@ interface GeneratorResultsProps {
   onDraftGenerated: (updated: Record<string, unknown>) => void;
 }
 
-export default function GeneratorResults({
-  content,
-  onDraftGenerated,
-}: GeneratorResultsProps) {
+export default function GeneratorResults({ content, onDraftGenerated }: GeneratorResultsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (containerRef.current) {
-      containerRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
+      containerRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, [content.id]);
 
   return (
-    <div
-      ref={containerRef}
-      className="animate-fade-in-up space-y-6 scroll-mt-24"
-    >
-      {/* Brief Panel — Full Width */}
-      <BriefPanel content={content} />
-
-      {/* Two Column — Outline + Meta */}
-      <div className="grid grid-cols-1 lg:grid-cols-[55%_1fr] gap-6">
-        {content.outline && <OutlinePanel outline={content.outline} />}
-        <MetaPanel content={content} />
+    <div ref={containerRef} className="animate-fade-in-up scroll-mt-20">
+      <div className="mb-6">
+        <BriefPanel content={content} />
       </div>
 
-      {/* Draft Panel — Full Width */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div className="min-w-0 overflow-hidden">
+          {content.outline && <OutlinePanel outline={content.outline} />}
+        </div>
+        <div className="min-w-0 overflow-hidden">
+          <MetaPanel content={content} />
+        </div>
+      </div>
+
       <DraftPanel content={content} onDraftGenerated={onDraftGenerated} />
     </div>
   );

@@ -32,83 +32,42 @@ function getCharCountColor(
   warnMax: number
 ): string {
   if (length >= optimalMin && length <= optimalMax) return "text-success";
-  if (
-    (length >= warnMin && length < optimalMin) ||
-    (length > optimalMax && length <= warnMax)
-  )
+  if ((length >= warnMin && length < optimalMin) || (length > optimalMax && length <= warnMax))
     return "text-warning";
   return "text-danger";
 }
 
 export default function MetaPanel({ content }: MetaPanelProps) {
   const fields: MetaFieldConfig[] = [
-    {
-      label: "Meta Title",
-      value: content.meta_title,
-      optimalMin: 50,
-      optimalMax: 60,
-      warnMin: 45,
-      warnMax: 70,
-    },
-    {
-      label: "Meta Description",
-      value: content.meta_description,
-      optimalMin: 150,
-      optimalMax: 160,
-      warnMin: 140,
-      warnMax: 170,
-    },
-    {
-      label: "OG Title",
-      value: content.og_title,
-      optimalMin: 40,
-      optimalMax: 60,
-      warnMin: 30,
-      warnMax: 70,
-    },
-    {
-      label: "OG Description",
-      value: content.og_description,
-      optimalMin: 100,
-      optimalMax: 200,
-      warnMin: 80,
-      warnMax: 220,
-    },
+    { label: "Meta Title", value: content.meta_title, optimalMin: 50, optimalMax: 60, warnMin: 45, warnMax: 70 },
+    { label: "Meta Description", value: content.meta_description, optimalMin: 150, optimalMax: 160, warnMin: 140, warnMax: 170 },
+    { label: "OG Title", value: content.og_title, optimalMin: 40, optimalMax: 60, warnMin: 30, warnMax: 70 },
+    { label: "OG Description", value: content.og_description, optimalMin: 100, optimalMax: 200, warnMin: 80, warnMax: 220 },
   ];
 
   return (
     <Card title="Meta Tags">
-      <div className="space-y-4">
+      <div className="space-y-3">
         {fields.map((field) => {
           const len = field.value?.length || 0;
           const colorClass = field.value
-            ? getCharCountColor(
-                len,
-                field.optimalMin,
-                field.optimalMax,
-                field.warnMin,
-                field.warnMax
-              )
+            ? getCharCountColor(len, field.optimalMin, field.optimalMax, field.warnMin, field.warnMax)
             : "text-text-muted";
 
           return (
             <div key={field.label}>
-              <span className="label block mb-1.5">{field.label}</span>
-              <div className="bg-bg-surface2 border border-border-default rounded-lg px-3 py-2.5">
-                <p className="text-sm mono text-text-primary leading-relaxed break-words">
+              <span className="label block mb-1">{field.label}</span>
+              <div className="bg-bg-surface2 border border-border-default rounded-md px-3 py-2 overflow-hidden">
+                <p className="text-xs mono text-text-primary leading-relaxed break-words">
                   {field.value || "—"}
                 </p>
               </div>
-              <div className="flex items-center justify-between mt-1.5">
-                <span className={`text-xs mono ${colorClass}`}>
+              <div className="flex items-center justify-between mt-1">
+                <span className={`text-[11px] mono ${colorClass}`}>
                   {len} / {field.optimalMin}-{field.optimalMax} chars
                 </span>
                 {field.value && (
-                  <CopyButton
-                    textToCopy={field.value}
-                    label={field.label}
-                    size="sm"
-                  />
+                  <CopyButton textToCopy={field.value} label={field.label} size="sm" />
                 )}
               </div>
             </div>
