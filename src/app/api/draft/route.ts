@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateWithClaude } from "@/lib/claude";
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { reserveQuota, GuardConfig } from "@/lib/usage-guard";
+
+// Full drafts are the most expensive call, so they get their own small budget.
+const GUARD: GuardConfig = { prefix: "cf", limit: 2, noun: "full drafts", scope: "draft" };
 
 interface OutlineItem {
   level: string;
@@ -91,6 +95,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Usage limit: atomic, per device and per network address
+    const reservation = await reserveQuota(request, supabase, GUARD);
+    if (!reservation.ok) return reservation.response;
+
     // Call Claude for draft
     let draftResponse: string;
     try {
@@ -108,9 +116,12 @@ export async function POST(request: NextRequest) {
       );
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
-      return NextResponse.json(
-        { error: `Claude API error: ${message}` },
-        { status: 500 }
+      await reservation.refund();
+      return reservation.respond(
+        NextResponse.json(
+          { error: `Claude API error: ${message}` },
+          { status: 500 }
+        )
       );
     }
 
@@ -137,7 +148,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(updated);
+    return reservation.respond(NextResponse.json(updated));
   } catch (err) {
     const message = err instanceof Error ? err.message : "Internal server error";
     return NextResponse.json({ error: message }, { status: 500 });

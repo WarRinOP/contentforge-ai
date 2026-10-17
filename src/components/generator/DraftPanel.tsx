@@ -5,6 +5,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import Badge from "@/components/ui/Badge";
 import CopyButton from "@/components/ui/CopyButton";
+import { getAdminKey } from "@/lib/session";
 
 interface ContentRecord {
   id: string;
@@ -31,7 +32,10 @@ export default function DraftPanel({ content, onDraftGenerated }: DraftPanelProp
     try {
       const res = await fetch("/api/draft", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(getAdminKey() ? { "x-admin-key": getAdminKey() } : {}),
+        },
         body: JSON.stringify({ contentId: content.id }),
       });
       if (!res.ok) {
